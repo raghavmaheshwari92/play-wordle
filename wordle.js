@@ -260,6 +260,7 @@ async function submitGuess() {
     if (guesses.includes(guess)) {
         showMessage('Word already used');
         shakeRow();
+        isSubmitting = false; // Unlock submissions
         return;
     }
 
@@ -297,7 +298,7 @@ async function submitGuess() {
 
         // Show result modal after a brief delay
         setTimeout(() => {
-            const timeElapsed = Math.round((Date.now() - startTime) / 1000);
+            const timeElapsed = startTime ? Math.round((Date.now() - startTime) / 1000) : 0;
             showResultModal(true, targetWord, timeElapsed, currentRow + 1);
         }, 1500);
 
@@ -310,7 +311,7 @@ async function submitGuess() {
 
         // Show result modal after a brief delay
         setTimeout(() => {
-            const timeElapsed = Math.round((Date.now() - startTime) / 1000);
+            const timeElapsed = startTime ? Math.round((Date.now() - startTime) / 1000) : 0;
             showResultModal(false, targetWord, timeElapsed, MAX_GUESSES);
         }, 1500);
 
@@ -512,11 +513,14 @@ function updateStatistics() {
 
 // Modal functions
 function showResultModal(won, word, time, attempts) {
+    console.log('showResultModal called:', {won, word, time, attempts});
     const modal = document.getElementById('result-modal');
     const modalTitle = document.getElementById('modal-title');
     const modalWord = document.getElementById('modal-word');
     const modalTime = document.getElementById('modal-time');
     const modalAttempts = document.getElementById('modal-attempts');
+
+    console.log('Modal elements found:', {modal, modalTitle, modalWord, modalTime, modalAttempts});
 
     // Set title and styling based on win/loss
     if (won) {
