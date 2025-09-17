@@ -82,6 +82,9 @@ let isMultiplayerMode = false;
 let currentPlayerName = '';
 let multiplayerData = null;
 
+// Prevent multiple submissions
+let isSubmitting = false;
+
 async function validateWord(word) {
     // Check cache first
     if (validatedWords.has(word)) {
@@ -170,6 +173,7 @@ function initializeGame() {
     currentTile = 0;
     isGameOver = false;
     guesses = [];
+    isSubmitting = false;
 
     // Reset timer
     stopTimer();
@@ -242,6 +246,8 @@ function deleteLetter() {
 }
 
 async function submitGuess() {
+    if (isSubmitting) return; // Prevent multiple submissions
+
     if (currentTile !== WORD_LENGTH) {
         showMessage('Not enough letters');
         shakeRow();
@@ -250,12 +256,22 @@ async function submitGuess() {
 
     const guess = getCurrentGuess();
 
+    // Check for duplicate words
+    if (guesses.includes(guess)) {
+        showMessage('Word already used');
+        shakeRow();
+        return;
+    }
+
+    isSubmitting = true; // Lock submissions
+
     // Validate the word
     const isValid = await validateWord(guess);
 
     if (!isValid) {
         showMessage('Not in word list');
         shakeRow();
+        isSubmitting = false; // Unlock submissions
         return;
     }
 
@@ -278,17 +294,33 @@ async function submitGuess() {
         }, 500);
         stopTimer();
         saveGameToHistory(true);
+
+        // Show result modal after a brief delay
+        setTimeout(() => {
+            const timeElapsed = Math.round((Date.now() - startTime) / 1000);
+            showResultModal(true, targetWord, timeElapsed, currentRow + 1);
+        }, 1500);
+
         handleMultiplayerGameEnd(true);
     } else if (currentRow === MAX_GUESSES - 1) {
         isGameOver = true;
         showMessage(targetWord);
         stopTimer();
         saveGameToHistory(false);
+
+        // Show result modal after a brief delay
+        setTimeout(() => {
+            const timeElapsed = Math.round((Date.now() - startTime) / 1000);
+            showResultModal(false, targetWord, timeElapsed, MAX_GUESSES);
+        }, 1500);
+
         handleMultiplayerGameEnd(false);
     } else {
         currentRow++;
         currentTile = 0;
     }
+
+    isSubmitting = false; // Unlock submissions after processing
 }
 
 function getCurrentGuess() {
@@ -478,6 +510,44 @@ function updateStatistics() {
     localStorage.setItem('wordleStatistics', JSON.stringify(stats));
 }
 
+// Modal functions
+function showResultModal(won, word, time, attempts) {
+    const modal = document.getElementById('result-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalWord = document.getElementById('modal-word');
+    const modalTime = document.getElementById('modal-time');
+    const modalAttempts = document.getElementById('modal-attempts');
+
+    // Set title and styling based on win/loss
+    if (won) {
+        modalTitle.textContent = 'Congratulations!';
+        modalTitle.className = 'modal-title win';
+    } else {
+        modalTitle.textContent = 'Game Over!';
+        modalTitle.className = 'modal-title lose';
+    }
+
+    // Set word and stats
+    modalWord.textContent = word;
+    modalTime.textContent = formatModalTime(time);
+    modalAttempts.textContent = attempts;
+
+    // Show modal
+    modal.style.display = 'flex';
+}
+
+function hideResultModal() {
+    const modal = document.getElementById('result-modal');
+    modal.style.display = 'none';
+}
+
+function formatModalTime(seconds) {
+    if (!seconds) return '00:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
 // Multiplayer functions
 function checkMultiplayerMode() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -545,10 +615,7 @@ function handleMultiplayerGameEnd(won) {
     // Save updated data
     localStorage.setItem('multiplayerGameData', JSON.stringify(multiplayerData));
 
-    // Show completion message and return to player selection after delay
-    setTimeout(() => {
-        window.location.href = 'multiplayer-game.html?return=true';
-    }, 3000);
+    // Navigation will be handled by the modal continue button
 }
 
 // Initialize game on DOM load
@@ -581,6 +648,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.location.href = 'multiplayer-game.html';
             } else {
                 initializeGame();
+            }
+        });
+    }
+
+    // Modal continue button
+    const modalContinueBtn = document.getElementById('modal-continue');
+    if (modalContinueBtn) {
+        modalContinueBtn.addEventListener('click', () => {
+            hideResultModal();
+            if (isMultiplayerMode) {
+                // For multiplayer, return to player selection after a brief delay
+                setTimeout(() => {
+                    window.location.href = 'multiplayer-game.html?return=true';
+                }, 500);
+            } else {
+                // For single player, just hide modal - they can start new game if they want
             }
         });
     }

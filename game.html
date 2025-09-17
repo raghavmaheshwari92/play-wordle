@@ -60,6 +60,31 @@
         <button id="new-game" class="new-game-btn">New Game</button>
     </div>
 
+    <!-- Game Result Modal -->
+    <div id="result-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div id="modal-title" class="modal-title"></div>
+            </div>
+            <div class="modal-body">
+                <div id="modal-word" class="modal-word"></div>
+                <div id="modal-stats" class="modal-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Time:</span>
+                        <span id="modal-time" class="stat-value"></span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Attempts:</span>
+                        <span id="modal-attempts" class="stat-value"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="modal-continue" class="modal-btn">Continue</button>
+            </div>
+        </div>
+    </div>
+
     <script src="wordle.js"></script>
 </body>
 </html>
