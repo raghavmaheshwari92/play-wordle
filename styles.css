@@ -38,6 +38,13 @@ h1 {
     letter-spacing: 0.2rem;
 }
 
+.player-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #538d4e;
+    margin-top: 5px;
+}
+
 .timer {
     position: absolute;
     top: 50%;

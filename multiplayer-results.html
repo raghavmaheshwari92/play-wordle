@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wordle - Multiplayer Results</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #121213;
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 0.2rem;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+        }
+
+        .results-section {
+            background-color: #1a1a1b;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .results-grid {
+            display: grid;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .player-result {
+            background-color: #2a2a2b;
+            border-radius: 10px;
+            padding: 25px;
+            text-align: left;
+            border: 2px solid transparent;
+        }
+
+        .player-result.winner {
+            border-color: #538d4e;
+            background-color: #1e3a1e;
+        }
+
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .player-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .player-result.winner .player-name {
+            color: #538d4e;
+        }
+
+        .result-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .badge-won {
+            background-color: #538d4e;
+            color: white;
+        }
+
+        .badge-lost {
+            background-color: #b85450;
+            color: white;
+        }
+
+        .word-display {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 0.2rem;
+            margin-bottom: 15px;
+            color: #ffffff;
+            text-transform: uppercase;
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #538d4e;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #818384;
+            text-transform: uppercase;
+        }
+
+        .winner-announcement {
+            background-color: #1e3a1e;
+            border: 2px solid #538d4e;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .winner-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #538d4e;
+            margin-bottom: 10px;
+        }
+
+        .winner-details {
+            font-size: 1.1rem;
+            color: #ffffff;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            min-width: 140px;
+        }
+
+        .btn-primary {
+            background-color: #538d4e;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #5fa653;
+            transform: scale(1.05);
+        }
+
+        .btn-secondary {
+            background-color: #818384;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #9a9a9c;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .player-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .stats-row {
+                justify-content: center;
+                gap: 30px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 250px;
+            }
+
+            .word-display {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Game Results</h1>
+
+        <div id="winner-announcement" class="winner-announcement" style="display: none;">
+            <!-- Winner announcement will be inserted here -->
+        </div>
+
+        <div class="results-section">
+            <div class="results-grid" id="results-grid">
+                <!-- Player results will be generated here -->
+            </div>
+
+            <div class="action-buttons">
+                <a href="multiplayer-setup.html" class="btn btn-secondary">New Game</a>
+                <a href="index.html" class="btn btn-primary">Home</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function loadResults() {
+            const gameData = JSON.parse(localStorage.getItem('multiplayerGameData'));
+            if (!gameData || !gameData.players) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const players = gameData.players;
+            const gameStates = gameData.gameStates;
+
+            // Calculate winner (fastest time among those who won, or best attempt if no winner)
+            const winners = players.filter(player => gameStates[player].won);
+            let winner = null;
+
+            if (winners.length > 0) {
+                winner = winners.reduce((best, player) => {
+                    const playerTime = gameStates[player].timeTaken || Infinity;
+                    const bestTime = gameStates[best].timeTaken || Infinity;
+                    return playerTime < bestTime ? player : best;
+                });
+            } else {
+                // No winners, find player with fewest attempts
+                winner = players.reduce((best, player) => {
+                    const playerAttempts = gameStates[player].attempts || MAX_GUESSES;
+                    const bestAttempts = gameStates[best].attempts || MAX_GUESSES;
+                    return playerAttempts < bestAttempts ? player : best;
+                });
+            }
+
+            displayWinnerAnnouncement(winner, gameStates[winner]);
+            displayResults(players, gameStates, winner);
+        }
+
+        function displayWinnerAnnouncement(winner, winnerState) {
+            const announcementEl = document.getElementById('winner-announcement');
+
+            if (winnerState.won) {
+                announcementEl.innerHTML = `
+                    <div class="winner-text">🎉 ${winner} Wins!</div>
+                    <div class="winner-details">
+                        Solved "${winnerState.word}" in ${winnerState.attempts} attempt${winnerState.attempts !== 1 ? 's' : ''}
+                        and ${formatTime(winnerState.timeTaken)} seconds
+                    </div>
+                `;
+            } else {
+                announcementEl.innerHTML = `
+                    <div class="winner-text">🏆 ${winner} - Best Performance</div>
+                    <div class="winner-details">
+                        Made it ${winnerState.attempts} attempts on "${winnerState.word}"
+                    </div>
+                `;
+            }
+
+            announcementEl.style.display = 'block';
+        }
+
+        function displayResults(players, gameStates, winner) {
+            const resultsGrid = document.getElementById('results-grid');
+            resultsGrid.innerHTML = '';
+
+            // Sort players by performance (winners first by time, then by attempts)
+            const sortedPlayers = [...players].sort((a, b) => {
+                const stateA = gameStates[a];
+                const stateB = gameStates[b];
+
+                // Both won - sort by time
+                if (stateA.won && stateB.won) {
+                    return (stateA.timeTaken || Infinity) - (stateB.timeTaken || Infinity);
+                }
+                // One won, one didn't - winner first
+                if (stateA.won !== stateB.won) {
+                    return stateB.won - stateA.won;
+                }
+                // Both lost - sort by attempts (fewer is better)
+                return (stateA.attempts || MAX_GUESSES) - (stateB.attempts || MAX_GUESSES);
+            });
+
+            sortedPlayers.forEach(player => {
+                const state = gameStates[player];
+                const isWinner = player === winner;
+
+                const playerResult = document.createElement('div');
+                playerResult.className = `player-result ${isWinner ? 'winner' : ''}`;
+
+                playerResult.innerHTML = `
+                    <div class="player-header">
+                        <div class="player-name">${player}</div>
+                        <div class="result-badge ${state.won ? 'badge-won' : 'badge-lost'}">
+                            ${state.won ? 'Won' : 'Lost'}
+                        </div>
+                    </div>
+                    <div class="word-display">${state.word}</div>
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <div class="stat-value">${state.attempts || 'N/A'}</div>
+                            <div class="stat-label">Attempts</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${formatTime(state.timeTaken)}</div>
+                            <div class="stat-label">Time</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${state.guesses ? state.guesses.length : 0}</div>
+                            <div class="stat-label">Guesses</div>
+                        </div>
+                    </div>
+                `;
+
+                resultsGrid.appendChild(playerResult);
+            });
+        }
+
+        function formatTime(seconds) {
+            if (!seconds) return 'N/A';
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return mins > 0 ? `${mins}:${secs.toString().padStart(2, '0')}` : `${secs}s`;
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', loadResults);
+    </script>
+</body>
+</html>

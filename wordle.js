@@ -77,6 +77,11 @@ let timerInterval = null;
 let startTime = null;
 let elapsedTime = 0;
 
+// Multiplayer variables
+let isMultiplayerMode = false;
+let currentPlayerName = '';
+let multiplayerData = null;
+
 async function validateWord(word) {
     // Check cache first
     if (validatedWords.has(word)) {
@@ -150,7 +155,17 @@ function getAlternateSpellings(word) {
 }
 
 function initializeGame() {
-    targetWord = TARGET_WORDS[Math.floor(Math.random() * TARGET_WORDS.length)];
+    // Check if this is multiplayer mode
+    checkMultiplayerMode();
+
+    // Set target word based on mode
+    if (isMultiplayerMode && currentPlayerName) {
+        targetWord = generatePlayerWord(currentPlayerName);
+        displayPlayerName();
+    } else {
+        targetWord = TARGET_WORDS[Math.floor(Math.random() * TARGET_WORDS.length)];
+    }
+
     currentRow = 0;
     currentTile = 0;
     isGameOver = false;
@@ -263,11 +278,13 @@ async function submitGuess() {
         }, 500);
         stopTimer();
         saveGameToHistory(true);
+        handleMultiplayerGameEnd(true);
     } else if (currentRow === MAX_GUESSES - 1) {
         isGameOver = true;
         showMessage(targetWord);
         stopTimer();
         saveGameToHistory(false);
+        handleMultiplayerGameEnd(false);
     } else {
         currentRow++;
         currentTile = 0;
@@ -357,6 +374,13 @@ function showMessage(text) {
 
 function startTimer() {
     startTime = Date.now();
+
+    // Track start time for multiplayer
+    if (isMultiplayerMode && currentPlayerName && multiplayerData) {
+        multiplayerData.gameStates[currentPlayerName].startTime = startTime;
+        localStorage.setItem('multiplayerGameData', JSON.stringify(multiplayerData));
+    }
+
     timerInterval = setInterval(updateTimerDisplay, 100);
 }
 
@@ -454,6 +478,79 @@ function updateStatistics() {
     localStorage.setItem('wordleStatistics', JSON.stringify(stats));
 }
 
+// Multiplayer functions
+function checkMultiplayerMode() {
+    const urlParams = new URLSearchParams(window.location.search);
+    isMultiplayerMode = urlParams.get('mode') === 'multiplayer';
+
+    if (isMultiplayerMode) {
+        currentPlayerName = localStorage.getItem('currentMultiplayerPlayer');
+        const gameData = localStorage.getItem('multiplayerGameData');
+        if (gameData) {
+            multiplayerData = JSON.parse(gameData);
+        }
+    }
+}
+
+function generatePlayerWord(playerName) {
+    // Get or create session ID for consistent word generation within one game
+    let sessionId = localStorage.getItem('multiplayerSessionId');
+    if (!sessionId) {
+        sessionId = Date.now().toString();
+        localStorage.setItem('multiplayerSessionId', sessionId);
+    }
+
+    // Generate different words for each player using name + session
+    const nameHash = playerName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const sessionHash = parseInt(sessionId.slice(-6));
+    const playerIndex = multiplayerData.players.indexOf(playerName);
+
+    // Combine all factors for unique word per player
+    const seed = (nameHash + sessionHash + (playerIndex * 17)) % TARGET_WORDS.length;
+    return TARGET_WORDS[seed];
+}
+
+function displayPlayerName() {
+    if (isMultiplayerMode && currentPlayerName) {
+        const playerNameEl = document.getElementById('player-name');
+        if (playerNameEl) {
+            playerNameEl.textContent = `${currentPlayerName}'s Turn`;
+            playerNameEl.style.display = 'block';
+        }
+
+        // Update new game button text for multiplayer
+        const newGameBtn = document.getElementById('new-game');
+        if (newGameBtn) {
+            newGameBtn.textContent = 'Back to Players';
+        }
+    }
+}
+
+function handleMultiplayerGameEnd(won) {
+    if (!isMultiplayerMode || !currentPlayerName || !multiplayerData) return;
+
+    // Update player's game state
+    const gameState = multiplayerData.gameStates[currentPlayerName];
+    gameState.completed = true;
+    gameState.won = won;
+    gameState.attempts = currentRow + (won ? 1 : 0);
+    gameState.word = targetWord;
+    gameState.endTime = Date.now();
+    gameState.guesses = [...guesses];
+
+    if (gameState.startTime) {
+        gameState.timeTaken = Math.round((gameState.endTime - gameState.startTime) / 1000);
+    }
+
+    // Save updated data
+    localStorage.setItem('multiplayerGameData', JSON.stringify(multiplayerData));
+
+    // Show completion message and return to player selection after delay
+    setTimeout(() => {
+        window.location.href = 'multiplayer-game.html?return=true';
+    }, 3000);
+}
+
 // Initialize game on DOM load
 document.addEventListener('DOMContentLoaded', () => {
     initializeGame();
@@ -479,6 +576,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // New game button
     const newGameBtn = document.getElementById('new-game');
     if (newGameBtn) {
-        newGameBtn.addEventListener('click', initializeGame);
+        newGameBtn.addEventListener('click', () => {
+            if (isMultiplayerMode) {
+                window.location.href = 'multiplayer-game.html';
+            } else {
+                initializeGame();
+            }
+        });
     }
 });

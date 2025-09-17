@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wordle - Multiplayer Setup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #121213;
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 0.2rem;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+        }
+
+        .setup-section {
+            background-color: #1a1a1b;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .players-list {
+            margin-bottom: 30px;
+        }
+
+        .player-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: #2a2a2b;
+            border-radius: 8px;
+        }
+
+        .player-number {
+            min-width: 80px;
+            font-weight: 600;
+            color: #818384;
+        }
+
+        .player-input {
+            flex: 1;
+            padding: 12px 16px;
+            background-color: #121213;
+            border: 2px solid #3a3a3c;
+            border-radius: 6px;
+            color: white;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .player-input:focus {
+            outline: none;
+            border-color: #538d4e;
+        }
+
+        .remove-player {
+            padding: 8px 12px;
+            background-color: #b85450;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .remove-player:hover {
+            background-color: #c66661;
+        }
+
+        .add-player-btn {
+            padding: 12px 24px;
+            background-color: #818384;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+            margin-bottom: 20px;
+        }
+
+        .add-player-btn:hover {
+            background-color: #9a9a9c;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            min-width: 140px;
+        }
+
+        .btn-primary {
+            background-color: #538d4e;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #5fa653;
+            transform: scale(1.05);
+        }
+
+        .btn-secondary {
+            background-color: #818384;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #9a9a9c;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 500px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .player-item {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .player-number {
+                min-width: auto;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Multiplayer Setup</h1>
+
+        <div class="setup-section">
+            <div class="players-list" id="players-list">
+                <!-- Players will be added here dynamically -->
+            </div>
+
+            <button class="add-player-btn" id="add-player-btn">Add More Players</button>
+
+            <div class="action-buttons">
+                <a href="index.html" class="btn btn-secondary">Back</a>
+                <button class="btn btn-primary" id="play-btn">Play</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let players = ['Player 1', 'Player 2']; // Default players
+        let playerCounter = 2;
+
+        function renderPlayers() {
+            const playersList = document.getElementById('players-list');
+            playersList.innerHTML = '';
+
+            players.forEach((player, index) => {
+                const playerItem = document.createElement('div');
+                playerItem.className = 'player-item';
+                playerItem.innerHTML = `
+                    <div class="player-number">Player ${index + 1}:</div>
+                    <input type="text" class="player-input" value="${player}"
+                           onchange="updatePlayerName(${index}, this.value)"
+                           placeholder="Enter player name">
+                    ${players.length > 2 ? `<button class="remove-player" onclick="removePlayer(${index})">Remove</button>` : ''}
+                `;
+                playersList.appendChild(playerItem);
+            });
+        }
+
+        function updatePlayerName(index, name) {
+            players[index] = name || `Player ${index + 1}`;
+        }
+
+        function addPlayer() {
+            playerCounter++;
+            players.push(`Player ${playerCounter}`);
+            renderPlayers();
+        }
+
+        function removePlayer(index) {
+            if (players.length > 2) {
+                players.splice(index, 1);
+                renderPlayers();
+            }
+        }
+
+        function startMultiplayerGame() {
+            // Filter out empty names and set defaults
+            const finalPlayers = players.map((name, index) =>
+                name.trim() || `Player ${index + 1}`
+            );
+
+            // Store players in localStorage for the multiplayer game
+            localStorage.setItem('multiplayerPlayers', JSON.stringify(finalPlayers));
+
+            // Clear any existing game data for fresh start
+            localStorage.removeItem('multiplayerGameData');
+            localStorage.removeItem('multiplayerSessionId');
+
+            // Navigate to player selection screen
+            window.location.href = 'multiplayer-game.html';
+        }
+
+        // Event listeners
+        document.getElementById('add-player-btn').addEventListener('click', addPlayer);
+        document.getElementById('play-btn').addEventListener('click', startMultiplayerGame);
+
+        // Initialize the page
+        renderPlayers();
+    </script>
+</body>
+</html>
