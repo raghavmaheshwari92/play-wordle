@@ -591,12 +591,6 @@ function displayPlayerName() {
             playerNameEl.textContent = `${currentPlayerName}'s Turn`;
             playerNameEl.style.display = 'block';
         }
-
-        // Show back button for multiplayer
-        const backBtn = document.getElementById('back-button');
-        if (backBtn) {
-            backBtn.style.display = 'block';
-        }
     }
 }
 
