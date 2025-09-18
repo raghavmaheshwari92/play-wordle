@@ -24,6 +24,7 @@
             margin: 0 auto;
             text-align: center;
             padding: 40px 20px;
+            position: relative;
         }
 
         h1 {
@@ -32,6 +33,7 @@
             letter-spacing: 0.2rem;
             margin-bottom: 40px;
             text-transform: uppercase;
+            position: relative;
         }
 
         .players-section {
@@ -175,6 +177,31 @@
             color: #6b7280;
         }
 
+        /* Back button in header */
+        .back-button {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-button:hover {
+            background-color: #e5e7eb;
+            color: #374151;
+            border-color: #d1d5db;
+        }
+
         @media (max-width: 500px) {
             h1 {
                 font-size: 2rem;
@@ -200,7 +227,14 @@
 </head>
 <body>
     <div class="container">
-        <h1>Multiplayer Game</h1>
+        <h1>
+            <a href="multiplayer-setup.html" class="back-button">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+            </a>
+            Multiplayer Game
+        </h1>
 
         <div class="players-section">
             <div class="section-title">Click on your name to start playing</div>
@@ -214,7 +248,6 @@
             </div>
 
             <div class="action-buttons">
-                <a href="multiplayer-setup.html" class="btn btn-secondary">Back to Setup</a>
                 <button class="btn btn-primary" id="view-results-btn" disabled>View Results</button>
             </div>
         </div>
