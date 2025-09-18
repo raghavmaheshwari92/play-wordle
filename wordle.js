@@ -592,10 +592,10 @@ function displayPlayerName() {
             playerNameEl.style.display = 'block';
         }
 
-        // Update new game button text for multiplayer
-        const newGameBtn = document.getElementById('new-game');
-        if (newGameBtn) {
-            newGameBtn.textContent = 'Back to Players';
+        // Show back button for multiplayer
+        const backBtn = document.getElementById('back-button');
+        if (backBtn) {
+            backBtn.style.display = 'block';
         }
     }
 }
@@ -644,15 +644,31 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // New game button
-    const newGameBtn = document.getElementById('new-game');
-    if (newGameBtn) {
-        newGameBtn.addEventListener('click', () => {
+    // Back button
+    const backBtn = document.getElementById('back-button');
+    if (backBtn) {
+        backBtn.addEventListener('click', () => {
             if (isMultiplayerMode) {
                 window.location.href = 'multiplayer-game.html';
             } else {
-                initializeGame();
+                window.location.href = 'index.html';
             }
+        });
+    }
+
+    // Submit button
+    const submitBtn = document.getElementById('submit-btn');
+    if (submitBtn) {
+        submitBtn.addEventListener('click', () => {
+            handleKeyPress('ENTER');
+        });
+    }
+
+    // Delete button
+    const deleteBtn = document.getElementById('delete-btn');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', () => {
+            handleKeyPress('BACKSPACE');
         });
     }
 

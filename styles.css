@@ -185,24 +185,67 @@ h1 {
     background-color: #3a3a3c;
 }
 
-.new-game-btn {
-    margin-top: 20px;
-    padding: 12px 24px;
-    background-color: #538d4e;
-    color: white;
+/* Back button in header */
+.back-button {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
     border: none;
+    color: #818384;
+    cursor: pointer;
+    padding: 8px;
     border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.back-button:hover {
+    background-color: #3a3a3c;
+    color: #ffffff;
+}
+
+/* Action buttons at bottom */
+.action-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 500px;
+}
+
+.action-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 6px;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
 }
 
-.new-game-btn:hover {
+.delete-btn {
+    background-color: #818384;
+    color: white;
+}
+
+.delete-btn:hover {
+    background-color: #9a9a9c;
+}
+
+.submit-btn {
+    background-color: #538d4e;
+    color: white;
+    flex: 2; /* Make submit button wider */
+}
+
+.submit-btn:hover {
     background-color: #5fa653;
 }
 
-.new-game-btn:active {
+.action-btn:active {
     transform: scale(0.98);
 }
 
@@ -226,6 +269,25 @@ h1 {
 
     h1 {
         font-size: 2rem;
+    }
+
+    .back-button {
+        left: 10px;
+        padding: 6px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .action-btn {
+        padding: 16px;
+        font-size: 1.1rem;
+    }
+
+    .submit-btn {
+        flex: 1; /* Equal width on mobile */
     }
 }
 
