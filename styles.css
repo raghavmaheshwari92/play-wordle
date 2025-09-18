@@ -6,8 +6,8 @@
 
 body {
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    background-color: #121213;
-    color: #ffffff;
+    background-color: #fafafa;
+    color: #1a1a1a;
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -26,7 +26,7 @@ body {
 
 header {
     text-align: center;
-    border-bottom: 1px solid #3a3a3c;
+    border-bottom: 1px solid #e5e5e5;
     padding-bottom: 10px;
     width: 100%;
     position: relative;
@@ -52,7 +52,7 @@ h1 {
     transform: translateY(-50%);
     font-size: 1.25rem;
     font-weight: 600;
-    color: #818384;
+    color: #6b7280;
     font-variant-numeric: tabular-nums;
 }
 
@@ -79,7 +79,8 @@ h1 {
 .tile {
     width: 62px;
     height: 62px;
-    border: 2px solid #3a3a3c;
+    border: 2px solid #d1d5db;
+    background-color: #ffffff;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -90,25 +91,28 @@ h1 {
 }
 
 .tile.filled {
-    border-color: #565758;
+    border-color: #9ca3af;
     animation: pop 0.1s ease-in-out;
 }
 
 .tile.correct {
-    background-color: #538d4e;
-    border-color: #538d4e;
+    background-color: #22c55e;
+    border-color: #22c55e;
+    color: white;
     animation: flip 0.5s ease;
 }
 
 .tile.present {
-    background-color: #b59f3b;
-    border-color: #b59f3b;
+    background-color: #f59e0b;
+    border-color: #f59e0b;
+    color: white;
     animation: flip 0.5s ease;
 }
 
 .tile.absent {
-    background-color: #3a3a3c;
-    border-color: #3a3a3c;
+    background-color: #6b7280;
+    border-color: #6b7280;
+    color: white;
     animation: flip 0.5s ease;
 }
 
@@ -146,26 +150,31 @@ h1 {
 }
 
 .key {
-    background-color: #818384;
-    color: white;
-    border: none;
+    background-color: #e5e7eb;
+    color: #1f2937;
+    border: 1px solid #d1d5db;
     padding: 0;
     width: 43px;
     height: 58px;
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: 1.25rem;
     font-weight: 700;
     cursor: pointer;
     text-transform: uppercase;
-    transition: background-color 0.1s ease;
+    transition: all 0.15s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .key:hover {
-    opacity: 0.9;
+    background-color: #f3f4f6;
+    border-color: #9ca3af;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .key:active {
     transform: scale(0.95);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .key-wide {
@@ -174,15 +183,24 @@ h1 {
 }
 
 .key.correct {
-    background-color: #538d4e;
+    background-color: #22c55e;
+    color: white;
+    border-color: #16a34a;
+    box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
 }
 
 .key.present {
-    background-color: #b59f3b;
+    background-color: #f59e0b;
+    color: white;
+    border-color: #d97706;
+    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
 }
 
 .key.absent {
-    background-color: #3a3a3c;
+    background-color: #6b7280;
+    color: white;
+    border-color: #4b5563;
+    box-shadow: 0 2px 4px rgba(107, 114, 128, 0.2);
 }
 
 /* Back button in header */
@@ -191,18 +209,19 @@ h1 {
     left: 20px;
     top: 50%;
     transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: #818384;
+    background-color: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    color: #6b7280;
     cursor: pointer;
     padding: 8px;
-    border-radius: 4px;
+    border-radius: 6px;
     transition: all 0.2s ease;
 }
 
 .back-button:hover {
-    background-color: #3a3a3c;
-    color: #ffffff;
+    background-color: #e5e7eb;
+    color: #374151;
+    border-color: #d1d5db;
 }
 
 /* Action buttons at bottom */
@@ -217,32 +236,42 @@ h1 {
 .action-btn {
     flex: 1;
     padding: 14px 20px;
-    border: none;
-    border-radius: 6px;
+    border: 2px solid;
+    border-radius: 8px;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
     text-transform: uppercase;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .delete-btn {
-    background-color: #818384;
-    color: white;
+    background-color: #f8fafc;
+    border-color: #e2e8f0;
+    color: #64748b;
 }
 
 .delete-btn:hover {
-    background-color: #9a9a9c;
+    background-color: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #475569;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .submit-btn {
-    background-color: #538d4e;
+    background-color: #22c55e;
+    border-color: #16a34a;
     color: white;
     flex: 2; /* Make submit button wider */
 }
 
 .submit-btn:hover {
-    background-color: #5fa653;
+    background-color: #16a34a;
+    border-color: #15803d;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(34, 197, 94, 0.2);
 }
 
 .action-btn:active {
@@ -298,7 +327,7 @@ h1 {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -306,14 +335,14 @@ h1 {
 }
 
 .modal-content {
-    background-color: #1a1a1b;
-    border-radius: 12px;
+    background-color: #ffffff;
+    border-radius: 16px;
     padding: 30px;
     max-width: 400px;
     width: 90%;
     text-align: center;
-    border: 2px solid #3a3a3c;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 .modal-header {
@@ -327,11 +356,11 @@ h1 {
 }
 
 .modal-title.win {
-    color: #538d4e;
+    color: #22c55e;
 }
 
 .modal-title.lose {
-    color: #b85450;
+    color: #ef4444;
 }
 
 .modal-body {
@@ -343,7 +372,7 @@ h1 {
     font-weight: 700;
     letter-spacing: 0.2rem;
     margin-bottom: 20px;
-    color: #ffffff;
+    color: #1f2937;
     text-transform: uppercase;
 }
 
@@ -363,14 +392,14 @@ h1 {
 
 .stat-label {
     font-size: 0.875rem;
-    color: #818384;
+    color: #6b7280;
     text-transform: uppercase;
 }
 
 .stat-value {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #538d4e;
+    color: #22c55e;
 }
 
 .modal-footer {
@@ -378,20 +407,24 @@ h1 {
 }
 
 .modal-btn {
-    background-color: #538d4e;
+    background-color: #22c55e;
     color: white;
-    border: none;
+    border: 2px solid #16a34a;
     border-radius: 8px;
     padding: 12px 24px;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
     min-width: 120px;
+    box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
 }
 
 .modal-btn:hover {
-    background-color: #5fa653;
+    background-color: #16a34a;
+    border-color: #15803d;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(34, 197, 94, 0.3);
 }
 
 @media (max-width: 500px) {
