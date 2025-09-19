@@ -552,7 +552,17 @@ async function submitGuess() {
     updateBoard(result);
     updateKeyboard(guess, result);
 
+    console.log('=== GAME END LOGIC CHECK ===');
+    console.log('guess:', guess);
+    console.log('targetWord:', targetWord);
+    console.log('currentRow:', currentRow);
+    console.log('MAX_GUESSES:', MAX_GUESSES);
+    console.log('MAX_GUESSES - 1:', MAX_GUESSES - 1);
+    console.log('guess === targetWord:', guess === targetWord);
+    console.log('currentRow === MAX_GUESSES - 1:', currentRow === MAX_GUESSES - 1);
+
     if (guess === targetWord) {
+        console.log('Taking WIN path');
         isGameOver = true;
         showMessage('Genius!');
         setTimeout(() => {
@@ -574,6 +584,7 @@ async function submitGuess() {
 
         handleMultiplayerGameEnd(true);
     } else if (currentRow === MAX_GUESSES - 1) {
+        console.log('Taking LOSE path');
         isGameOver = true;
         showMessage(targetWord);
         stopTimer();
@@ -587,6 +598,7 @@ async function submitGuess() {
 
         handleMultiplayerGameEnd(false);
     } else {
+        console.log('Taking CONTINUE path - moving to next row');
         currentRow++;
         currentTile = 0;
     }
