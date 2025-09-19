@@ -1090,6 +1090,16 @@ function restoreCompletedGame(gameState) {
     elapsedTime = gameState.timeTaken ? gameState.timeTaken * 1000 : 0;
     startTime = null;
 
+    console.log('Restoring completed game:', {
+        targetWord,
+        guesses: guesses.length,
+        gameState: gameState,
+        timeTaken: gameState.timeTaken
+    });
+
+    // Update timer display with final time
+    updateTimerDisplayForCompleted(gameState.timeTaken || 0);
+
     // Build the board to show the final state
     setTimeout(() => {
         restoreBoardState();
@@ -1102,6 +1112,16 @@ function restoreCompletedGame(gameState) {
             showMessage(`Game completed - Word was: ${targetWord}`);
         }
     }, 100);
+}
+
+function updateTimerDisplayForCompleted(timeInSeconds) {
+    const timerEl = document.getElementById('timer');
+    if (!timerEl) return;
+
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = timeInSeconds % 60;
+    const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    timerEl.textContent = formattedTime;
 }
 
 // Initialize game on DOM load
