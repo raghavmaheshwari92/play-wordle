@@ -303,7 +303,7 @@ function getDifficultyColor(difficulty) {
         case DIFFICULTY_LEVELS.EASY:
             return '#6b8e6b'; // Muted green
         case DIFFICULTY_LEVELS.MEDIUM:
-            return '#c4a572'; // Muted orange
+            return '#b5a082'; // Muted orange
         case DIFFICULTY_LEVELS.HARD:
             return '#c47272'; // Muted red
         default:
@@ -917,7 +917,7 @@ function handleMultiplayerGameEnd(won) {
 }
 
 function hasExistingGameState() {
-    if (!isMultiplayerMode || !currentPlayerName) return false;
+    if (!isMultiplayerMode || !currentPlayerName || !multiplayerData) return false;
 
     const gameState = multiplayerData.gameStates[currentPlayerName];
     return gameState && gameState.currentProgress && !gameState.completed;
@@ -955,7 +955,7 @@ function saveCurrentGameState() {
 }
 
 function restoreGameState() {
-    if (!isMultiplayerMode || !currentPlayerName) return;
+    if (!isMultiplayerMode || !currentPlayerName || !multiplayerData) return;
 
     const gameState = multiplayerData.gameStates[currentPlayerName];
     if (!gameState || gameState.completed || !gameState.currentProgress) return;
@@ -963,13 +963,16 @@ function restoreGameState() {
     const progress = gameState.currentProgress;
 
     // Restore game variables
-    currentRow = progress.currentRow;
-    currentTile = progress.currentTile;
-    guesses = [...progress.guesses];
-    isGameOver = progress.isGameOver;
-    startTime = progress.startTime;
-    elapsedTime = progress.elapsedTime;
+    currentRow = progress.currentRow || 0;
+    currentTile = progress.currentTile || 0;
+    guesses = progress.guesses ? [...progress.guesses] : [];
+    isGameOver = progress.isGameOver || false;
+    startTime = progress.startTime || null;
+    elapsedTime = progress.elapsedTime || 0;
     targetWord = progress.targetWord;
+    isSubmitting = false; // Ensure we can accept input
+
+    console.log('Restored game state:', { currentRow, currentTile, isGameOver, guesses: guesses.length });
 
     // Restore the board and keyboard state
     setTimeout(() => {
