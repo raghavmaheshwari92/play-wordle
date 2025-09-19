@@ -992,6 +992,13 @@ function displayPlayerName() {
 function handleMultiplayerGameEnd(won) {
     if (!isMultiplayerMode || !currentPlayerName || !multiplayerData) return;
 
+    console.log('=== HANDLING MULTIPLAYER GAME END ===');
+    console.log('won:', won);
+    console.log('currentRow:', currentRow);
+    console.log('guesses array:', guesses);
+    console.log('guesses.length:', guesses.length);
+    console.log('targetWord:', targetWord);
+
     // Update player's game state
     const gameState = multiplayerData.gameStates[currentPlayerName];
     gameState.completed = true;
@@ -1000,6 +1007,9 @@ function handleMultiplayerGameEnd(won) {
     gameState.word = targetWord;
     gameState.endTime = Date.now();
     gameState.guesses = [...guesses];
+
+    console.log('Saved guesses to gameState:', gameState.guesses);
+    console.log('gameState.guesses.length:', gameState.guesses.length);
 
     if (gameState.startTime) {
         gameState.timeTaken = Math.round((gameState.endTime - gameState.startTime) / 1000);
