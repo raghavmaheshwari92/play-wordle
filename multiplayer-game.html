@@ -359,9 +359,8 @@
                 const playerCard = document.createElement('div');
                 playerCard.className = `player-card ${isCompleted ? 'completed' : ''}`;
 
-                if (!isCompleted) {
-                    playerCard.onclick = () => startPlayerGame(player, index);
-                }
+                // Make all player cards clickable
+                playerCard.onclick = () => startPlayerGame(player, index);
 
                 // Generate details for completed players
                 let detailsHTML = '';
@@ -394,7 +393,7 @@
                             </div>
                         </div>
                         <div class="player-action">
-                            ${isCompleted ? '✓ Chance finished' : 'Click to play →'}
+                            ${isCompleted ? 'Click to view →' : 'Click to play →'}
                         </div>
                     </div>
                     ${detailsHTML}

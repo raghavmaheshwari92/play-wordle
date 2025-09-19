@@ -962,7 +962,14 @@ function restoreGameState() {
     if (!isMultiplayerMode || !currentPlayerName || !multiplayerData) return;
 
     const gameState = multiplayerData.gameStates[currentPlayerName];
-    if (!gameState || gameState.completed || !gameState.currentProgress) return;
+
+    // Handle completed games differently - show final state
+    if (gameState && gameState.completed) {
+        restoreCompletedGame(gameState);
+        return;
+    }
+
+    if (!gameState || !gameState.currentProgress) return;
 
     const progress = gameState.currentProgress;
 
@@ -1072,6 +1079,30 @@ window.addEventListener('focus', () => {
         updateTimerDisplay();
     }
 });
+
+function restoreCompletedGame(gameState) {
+    // Set game as completed and show final state
+    isGameOver = true;
+    targetWord = gameState.word;
+    guesses = gameState.guesses || [];
+    currentRow = gameState.attempts || guesses.length;
+    currentTile = 0;
+    elapsedTime = gameState.timeTaken ? gameState.timeTaken * 1000 : 0;
+    startTime = null;
+
+    // Build the board to show the final state
+    setTimeout(() => {
+        restoreBoardState();
+        restoreKeyboardState();
+
+        // Show the final result message
+        if (gameState.won) {
+            showMessage('Game completed - Word found!');
+        } else {
+            showMessage(`Game completed - Word was: ${targetWord}`);
+        }
+    }, 100);
+}
 
 // Initialize game on DOM load
 document.addEventListener('DOMContentLoaded', () => {
