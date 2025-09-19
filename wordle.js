@@ -398,14 +398,21 @@ function getAlternateSpellings(word) {
 }
 
 function initializeGame() {
+    console.log('=== INITIALIZE GAME START ===');
+
     // Check if this is multiplayer mode
     checkMultiplayerMode();
+
+    console.log('After checkMultiplayerMode:');
+    console.log('isMultiplayerMode:', isMultiplayerMode);
+    console.log('currentPlayerName:', currentPlayerName);
+    console.log('targetWord:', targetWord);
 
     // Use hardcoded medium difficulty
 
     // Set target word based on mode
     if (isMultiplayerMode && currentPlayerName) {
-        targetWord = generatePlayerWord(currentPlayerName);
+        // Target word will be set from the initialized game state
         displayPlayerName();
     } else {
         targetWord = selectRandomWord(DIFFICULTY_LEVELS.MEDIUM);
@@ -422,11 +429,8 @@ function initializeGame() {
         isSubmitting = false;
     }
 
-    // Reset timer
+    // Stop any existing timer - restoration will handle setting correct state
     stopTimer();
-    startTime = null;
-    elapsedTime = 0;
-    updateTimerDisplay();
 
     const gameBoard = document.getElementById('game-board');
     gameBoard.innerHTML = '';
@@ -448,6 +452,13 @@ function initializeGame() {
 
     clearKeyboardColors();
     showMessage('');
+
+    // Initialize timer display for new games (multiplayer restoration will override this)
+    if (!isMultiplayerMode) {
+        startTime = null;
+        elapsedTime = 0;
+        updateTimerDisplay();
+    }
 }
 
 function clearKeyboardColors() {
@@ -670,7 +681,10 @@ function showMessage(text) {
 }
 
 function startTimer() {
-    startTime = Date.now();
+    if (timerInterval) return; // Already running
+
+    // Set startTime relative to any existing elapsed time
+    startTime = Date.now() - elapsedTime;
 
     // Track start time for multiplayer
     if (isMultiplayerMode && currentPlayerName && multiplayerData) {
@@ -679,6 +693,7 @@ function startTimer() {
     }
 
     timerInterval = setInterval(updateTimerDisplay, 100);
+    updateTimerDisplay();
 }
 
 function stopTimer() {
@@ -688,6 +703,7 @@ function stopTimer() {
     }
     if (startTime) {
         elapsedTime = Date.now() - startTime;
+        startTime = null;
     }
 }
 
@@ -695,18 +711,25 @@ function updateTimerDisplay() {
     const timerEl = document.getElementById('timer');
     if (!timerEl) return;
 
-    if (!startTime) {
-        timerEl.textContent = '00:00';
-        return;
+    let displayTime;
+
+    if (startTime && timerInterval) {
+        // Timer is actively running - calculate from startTime
+        displayTime = Date.now() - startTime + elapsedTime;
+    } else if (elapsedTime > 0) {
+        // Timer is paused but we have elapsed time - show stored time
+        displayTime = elapsedTime;
+    } else {
+        // No time elapsed yet
+        displayTime = 0;
     }
 
-    const currentTime = Date.now();
-    const elapsed = currentTime - startTime;
-    const minutes = Math.floor(elapsed / 60000);
-    const seconds = Math.floor((elapsed % 60000) / 1000);
-
+    const minutes = Math.floor(displayTime / 60000);
+    const seconds = Math.floor((displayTime % 60000) / 1000);
     const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
     timerEl.textContent = formattedTime;
+    console.log(`Timer display: ${formattedTime} (elapsed: ${elapsedTime}, running: ${!!timerInterval})`);
 }
 
 function updateDifficultyIndicator() {
@@ -865,17 +888,65 @@ function checkMultiplayerMode() {
         const gameData = localStorage.getItem('multiplayerGameData');
         console.log('Raw game data from localStorage:', gameData);
 
+        // Initialize multiplayerData regardless of whether data exists
         if (gameData) {
-            multiplayerData = JSON.parse(gameData);
-            console.log('Parsed multiplayerData:', multiplayerData);
-
-            if (currentPlayerName && multiplayerData.gameStates) {
-                console.log(`Game state for ${currentPlayerName}:`, multiplayerData.gameStates[currentPlayerName]);
+            try {
+                multiplayerData = JSON.parse(gameData);
+                console.log('Parsed multiplayerData:', multiplayerData);
+            } catch (e) {
+                console.error('Error parsing game data:', e);
+                multiplayerData = { gameStates: {} };
             }
+        } else {
+            // Create fresh multiplayerData structure
+            console.log('No existing game data, creating fresh multiplayerData');
+            multiplayerData = { gameStates: {} };
+        }
+
+        // Ensure gameStates object exists
+        if (!multiplayerData.gameStates) {
+            multiplayerData.gameStates = {};
+        }
+
+        if (currentPlayerName && multiplayerData.gameStates) {
+            console.log(`Game state for ${currentPlayerName}:`, multiplayerData.gameStates[currentPlayerName]);
+        }
+
+        // Ensure player has a proper game state initialized
+        if (currentPlayerName) {
+            initializePlayerGameState();
         }
 
         // Restore ongoing game state if player hasn't completed the game
         restoreGameState();
+    }
+}
+
+function initializePlayerGameState() {
+    if (!currentPlayerName || !multiplayerData) {
+        console.log('Cannot initialize player state - missing data');
+        return;
+    }
+
+    // Initialize player's game state if it doesn't exist or is incomplete
+    if (!multiplayerData.gameStates[currentPlayerName] || !multiplayerData.gameStates[currentPlayerName].word) {
+        const playerWord = generatePlayerWord(currentPlayerName);
+
+        multiplayerData.gameStates[currentPlayerName] = {
+            completed: false,
+            won: false,
+            attempts: 0,
+            word: playerWord,
+            startTime: null,
+            endTime: null,
+            guesses: [],
+            timeTaken: 0
+        };
+
+        console.log('Initialized game state for', currentPlayerName, 'with word:', playerWord);
+        localStorage.setItem('multiplayerGameData', JSON.stringify(multiplayerData));
+    } else {
+        console.log('Player state already exists for', currentPlayerName);
     }
 }
 
@@ -898,12 +969,22 @@ function generatePlayerWord(playerName) {
 }
 
 function displayPlayerName() {
+    console.log('=== DISPLAY PLAYER NAME ===');
+    console.log('isMultiplayerMode:', isMultiplayerMode);
+    console.log('currentPlayerName:', currentPlayerName);
+
     if (isMultiplayerMode && currentPlayerName) {
         const playerNameEl = document.getElementById('player-name');
+        console.log('playerNameEl found:', !!playerNameEl);
         if (playerNameEl) {
             playerNameEl.textContent = `${currentPlayerName}'s Turn`;
             playerNameEl.style.display = 'block';
+            console.log('Player name displayed:', playerNameEl.textContent);
+        } else {
+            console.error('player-name element not found in DOM');
         }
+    } else {
+        console.log('Not displaying player name - missing mode or player name');
     }
 }
 
@@ -951,10 +1032,23 @@ function hasExistingGameState() {
 }
 
 function saveCurrentGameState() {
-    if (!isMultiplayerMode || !currentPlayerName) return;
+    console.log('=== ATTEMPTING TO SAVE GAME STATE ===');
+    console.log('isMultiplayerMode:', isMultiplayerMode);
+    console.log('currentPlayerName:', currentPlayerName);
+    console.log('multiplayerData:', multiplayerData);
+
+    if (!isMultiplayerMode || !currentPlayerName) {
+        console.log('Exiting save: no multiplayer mode or player name');
+        return;
+    }
 
     const gameState = multiplayerData.gameStates[currentPlayerName];
-    if (!gameState || gameState.completed) return;
+    console.log('gameState for', currentPlayerName, ':', gameState);
+
+    if (!gameState || gameState.completed) {
+        console.log('Exiting save: no game state or already completed');
+        return;
+    }
 
     // Get current letters in the current row
     const currentLetters = [];
@@ -972,8 +1066,7 @@ function saveCurrentGameState() {
         currentTile,
         guesses: [...guesses],
         isGameOver,
-        startTime,
-        elapsedTime: currentElapsed,
+        elapsedTime: currentElapsed, // Only save elapsed time, not startTime
         targetWord,
         currentLetters
     };
@@ -985,14 +1078,27 @@ function restoreGameState() {
     if (!isMultiplayerMode || !currentPlayerName || !multiplayerData) return;
 
     const gameState = multiplayerData.gameStates[currentPlayerName];
+    if (!gameState) return;
+
+    // Always set the target word from the game state
+    if (gameState.word) {
+        targetWord = gameState.word;
+        console.log('Set target word from game state:', targetWord);
+    }
 
     // Handle completed games differently - show final state
-    if (gameState && gameState.completed) {
+    if (gameState.completed) {
         restoreCompletedGame(gameState);
         return;
     }
 
-    if (!gameState || !gameState.currentProgress) return;
+    // If no current progress, this is a fresh game - just display the word
+    if (!gameState.currentProgress) {
+        console.log('Fresh game for', currentPlayerName, 'with word:', targetWord);
+        updateTimerDisplay(); // Show 00:00 for fresh game
+        displayPlayerName(); // Show player name
+        return;
+    }
 
     const progress = gameState.currentProgress;
 
@@ -1001,10 +1107,13 @@ function restoreGameState() {
     currentTile = progress.currentTile || 0;
     guesses = progress.guesses ? [...progress.guesses] : [];
     isGameOver = progress.isGameOver || false;
-    startTime = progress.startTime || null;
     elapsedTime = progress.elapsedTime || 0;
 
+    console.log('=== RESTORING IN-PROGRESS GAME ===');
     console.log('Restored elapsedTime from progress:', elapsedTime);
+    console.log('isGameOver:', isGameOver);
+    console.log('currentRow:', currentRow);
+    console.log('currentTile:', currentTile);
     targetWord = progress.targetWord;
     isSubmitting = false; // Ensure we can accept input
 
@@ -1013,15 +1122,22 @@ function restoreGameState() {
     setTimeout(() => {
         restoreBoardState();
         restoreKeyboardState();
-        if (startTime && !isGameOver) {
-            // Resume timer without resetting startTime
-            timerInterval = setInterval(updateTimerDisplay, 100);
+        if (!isGameOver) {
+            // Always show the timer, whether it's running or not
             updateTimerDisplay();
+            if (elapsedTime > 0) {
+                // Resume the timer if there's elapsed time
+                console.log('Resuming timer with elapsedTime:', elapsedTime);
+                startTimer();
+            }
         } else if (isGameOver) {
             // For completed games, show the final time from elapsedTime
             const finalTimeSeconds = Math.round(elapsedTime / 1000);
             updateTimerDisplayForCompleted(finalTimeSeconds);
         }
+
+        // Always display player name after restoration
+        displayPlayerName();
     }, 100);
 }
 
