@@ -996,7 +996,7 @@ function handleMultiplayerGameEnd(won) {
     const gameState = multiplayerData.gameStates[currentPlayerName];
     gameState.completed = true;
     gameState.won = won;
-    gameState.attempts = currentRow + (won ? 1 : 0);
+    gameState.attempts = won ? currentRow + 1 : MAX_GUESSES;
     gameState.word = targetWord;
     gameState.endTime = Date.now();
     gameState.guesses = [...guesses];
