@@ -261,7 +261,7 @@ let guesses = [];
 let timerInterval = null;
 let startTime = null;
 let elapsedTime = 0;
-let currentDifficulty = DIFFICULTY_LEVELS.MIXED;
+let currentDifficulty = DIFFICULTY_LEVELS.MEDIUM;
 
 // Multiplayer variables
 let isMultiplayerMode = false;
@@ -401,29 +401,17 @@ function initializeGame() {
     // Check if this is multiplayer mode
     checkMultiplayerMode();
 
-    // Get difficulty from URL parameters or localStorage
-    const urlParams = new URLSearchParams(window.location.search);
-    const difficultyParam = urlParams.get('difficulty');
-    if (difficultyParam && Object.values(DIFFICULTY_LEVELS).includes(difficultyParam)) {
-        currentDifficulty = difficultyParam;
-    } else {
-        // Try to get from localStorage for single player
-        const savedDifficulty = localStorage.getItem('wordleDifficulty');
-        if (savedDifficulty && Object.values(DIFFICULTY_LEVELS).includes(savedDifficulty)) {
-            currentDifficulty = savedDifficulty;
-        }
-    }
+    // Use hardcoded medium difficulty
 
     // Set target word based on mode
     if (isMultiplayerMode && currentPlayerName) {
         targetWord = generatePlayerWord(currentPlayerName);
         displayPlayerName();
     } else {
-        targetWord = selectRandomWord(currentDifficulty);
+        targetWord = selectRandomWord(DIFFICULTY_LEVELS.MEDIUM);
     }
 
-    // Update difficulty indicator
-    updateDifficultyIndicator();
+    // No difficulty indicator needed for hardcoded difficulty
 
     currentRow = 0;
     currentTile = 0;
