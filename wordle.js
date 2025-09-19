@@ -923,6 +923,20 @@ function handleMultiplayerGameEnd(won) {
         gameState.timeTaken = Math.round((gameState.endTime - gameState.startTime) / 1000);
     }
 
+    // Also save final state to currentProgress so it can be restored correctly
+    gameState.currentProgress = {
+        currentRow,
+        currentTile: 0,
+        guesses: [...guesses],
+        isGameOver: true,
+        startTime,
+        elapsedTime,
+        targetWord,
+        currentLetters: []
+    };
+
+    console.log('Saved final game state:', gameState);
+
     // Save updated data
     localStorage.setItem('multiplayerGameData', JSON.stringify(multiplayerData));
 
@@ -989,6 +1003,8 @@ function restoreGameState() {
     isGameOver = progress.isGameOver || false;
     startTime = progress.startTime || null;
     elapsedTime = progress.elapsedTime || 0;
+
+    console.log('Restored elapsedTime from progress:', elapsedTime);
     targetWord = progress.targetWord;
     isSubmitting = false; // Ensure we can accept input
 
@@ -1001,6 +1017,10 @@ function restoreGameState() {
             // Resume timer without resetting startTime
             timerInterval = setInterval(updateTimerDisplay, 100);
             updateTimerDisplay();
+        } else if (isGameOver) {
+            // For completed games, show the final time from elapsedTime
+            const finalTimeSeconds = Math.round(elapsedTime / 1000);
+            updateTimerDisplayForCompleted(finalTimeSeconds);
         }
     }, 100);
 }
