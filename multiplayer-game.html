@@ -172,6 +172,12 @@
             border-color: #bae6fd;
         }
 
+        .detail-capsule.in-progress {
+            background-color: #faf5ff;
+            color: #6b21a8;
+            border-color: #e9d5ff;
+        }
+
         .action-buttons {
             display: flex;
             gap: 15px;
@@ -362,7 +368,7 @@
                 // Make all player cards clickable
                 playerCard.onclick = () => startPlayerGame(player, index);
 
-                // Generate details for completed players
+                // Generate details for completed or in-progress players
                 let detailsHTML = '';
                 if (isCompleted) {
                     const timeTaken = gameState.timeTaken ? `${Math.floor(gameState.timeTaken / 60)}:${(gameState.timeTaken % 60).toString().padStart(2, '0')}` : 'N/A';
@@ -382,6 +388,37 @@
                             </div>
                         </div>
                     `;
+                } else if (gameState.currentProgress) {
+                    // Show progress for in-progress games
+                    const progress = gameState.currentProgress;
+                    const guessCount = progress.guesses ? progress.guesses.length : 0;
+                    const currentRow = progress.currentRow || 0;
+                    const attemptsUsed = guessCount > 0 ? guessCount : (currentRow > 0 ? currentRow : 0);
+
+                    // Calculate elapsed time
+                    let timeDisplay = '0:00';
+                    if (progress.elapsedTime) {
+                        const seconds = Math.round(progress.elapsedTime / 1000);
+                        const mins = Math.floor(seconds / 60);
+                        const secs = seconds % 60;
+                        timeDisplay = `${mins}:${secs.toString().padStart(2, '0')}`;
+                    }
+
+                    if (attemptsUsed > 0 || progress.elapsedTime > 0) {
+                        detailsHTML = `
+                            <div class="player-details">
+                                <div class="detail-capsule in-progress">
+                                    🎯 In progress
+                                </div>
+                                <div class="detail-capsule attempts">
+                                    ${attemptsUsed}/6 attempts
+                                </div>
+                                <div class="detail-capsule time">
+                                    ⏱ ${timeDisplay}
+                                </div>
+                            </div>
+                        `;
+                    }
                 }
 
                 playerCard.innerHTML = `
