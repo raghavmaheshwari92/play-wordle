@@ -1167,20 +1167,37 @@ function restoreBoardState() {
     }
 
     // Restore completed guesses
+    console.log('=== RESTORING BOARD STATE ===');
     console.log('Restoring guesses:', guesses);
+    console.log('guesses.length:', guesses.length);
     console.log('Target word for checking:', targetWord);
 
+    if (!guesses || guesses.length === 0) {
+        console.error('No guesses to restore! This should not happen for a completed game.');
+        return;
+    }
+
     guesses.forEach((guess, rowIndex) => {
-        console.log(`Restoring guess ${rowIndex}: ${guess}`);
+        console.log(`Restoring guess ${rowIndex}: "${guess}"`);
+        if (!guess || guess.length !== WORD_LENGTH) {
+            console.error(`Invalid guess at row ${rowIndex}:`, guess);
+            return;
+        }
+
         for (let i = 0; i < WORD_LENGTH; i++) {
             const tile = document.getElementById(`row-${rowIndex}-tile-${i}`);
-            console.log(`Setting tile ${rowIndex}-${i} to ${guess[i]}`);
+            if (!tile) {
+                console.error(`Tile not found: row-${rowIndex}-tile-${i}`);
+                continue;
+            }
+
+            console.log(`Setting tile ${rowIndex}-${i} to "${guess[i]}"`);
             tile.textContent = guess[i];
             tile.classList.add('filled');
 
             // Apply the result styling
             const result = checkGuess(guess, targetWord);
-            console.log(`Result for ${guess}: ${result}`);
+            console.log(`Result for "${guess}": ${result.join(',')}`);
             tile.classList.add(result[i]);
         }
     });
