@@ -860,9 +860,18 @@ function checkMultiplayerMode() {
 
     if (isMultiplayerMode) {
         currentPlayerName = localStorage.getItem('currentMultiplayerPlayer');
+        console.log('Current player name:', currentPlayerName);
+
         const gameData = localStorage.getItem('multiplayerGameData');
+        console.log('Raw game data from localStorage:', gameData);
+
         if (gameData) {
             multiplayerData = JSON.parse(gameData);
+            console.log('Parsed multiplayerData:', multiplayerData);
+
+            if (currentPlayerName && multiplayerData.gameStates) {
+                console.log(`Game state for ${currentPlayerName}:`, multiplayerData.gameStates[currentPlayerName]);
+            }
         }
 
         // Restore ongoing game state if player hasn't completed the game
@@ -1017,14 +1026,20 @@ function restoreBoardState() {
     }
 
     // Restore completed guesses
+    console.log('Restoring guesses:', guesses);
+    console.log('Target word for checking:', targetWord);
+
     guesses.forEach((guess, rowIndex) => {
+        console.log(`Restoring guess ${rowIndex}: ${guess}`);
         for (let i = 0; i < WORD_LENGTH; i++) {
             const tile = document.getElementById(`row-${rowIndex}-tile-${i}`);
+            console.log(`Setting tile ${rowIndex}-${i} to ${guess[i]}`);
             tile.textContent = guess[i];
             tile.classList.add('filled');
 
             // Apply the result styling
             const result = checkGuess(guess, targetWord);
+            console.log(`Result for ${guess}: ${result}`);
             tile.classList.add(result[i]);
         }
     });
@@ -1081,6 +1096,14 @@ window.addEventListener('focus', () => {
 });
 
 function restoreCompletedGame(gameState) {
+    console.log('=== RESTORING COMPLETED GAME ===');
+    console.log('Full gameState:', JSON.stringify(gameState, null, 2));
+    console.log('gameState.guesses:', gameState.guesses);
+    console.log('gameState.timeTaken:', gameState.timeTaken);
+    console.log('gameState.word:', gameState.word);
+    console.log('gameState.won:', gameState.won);
+    console.log('gameState.attempts:', gameState.attempts);
+
     // Set game as completed and show final state
     isGameOver = true;
     targetWord = gameState.word;
@@ -1090,18 +1113,19 @@ function restoreCompletedGame(gameState) {
     elapsedTime = gameState.timeTaken ? gameState.timeTaken * 1000 : 0;
     startTime = null;
 
-    console.log('Restoring completed game:', {
-        targetWord,
-        guesses: guesses.length,
-        gameState: gameState,
-        timeTaken: gameState.timeTaken
-    });
+    console.log('After setting variables:');
+    console.log('targetWord:', targetWord);
+    console.log('guesses:', guesses);
+    console.log('guesses.length:', guesses.length);
+    console.log('currentRow:', currentRow);
+    console.log('elapsedTime:', elapsedTime);
 
     // Update timer display with final time
     updateTimerDisplayForCompleted(gameState.timeTaken || 0);
 
     // Build the board to show the final state
     setTimeout(() => {
+        console.log('About to restore board state...');
         restoreBoardState();
         restoreKeyboardState();
 
