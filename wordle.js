@@ -683,8 +683,8 @@ function showMessage(text) {
 function startTimer() {
     if (timerInterval) return; // Already running
 
-    // Set startTime relative to any existing elapsed time
-    startTime = Date.now() - elapsedTime;
+    // Set startTime to current time for this session
+    startTime = Date.now();
 
     // Track start time for multiplayer
     if (isMultiplayerMode && currentPlayerName && multiplayerData) {
@@ -702,7 +702,8 @@ function stopTimer() {
         timerInterval = null;
     }
     if (startTime) {
-        elapsedTime = Date.now() - startTime;
+        // Add current session time to total elapsed time
+        elapsedTime += Date.now() - startTime;
         startTime = null;
     }
 }
@@ -714,8 +715,8 @@ function updateTimerDisplay() {
     let displayTime;
 
     if (startTime && timerInterval) {
-        // Timer is actively running - calculate from startTime
-        displayTime = Date.now() - startTime + elapsedTime;
+        // Timer is actively running - add current session time to previous elapsed time
+        displayTime = elapsedTime + (Date.now() - startTime);
     } else if (elapsedTime > 0) {
         // Timer is paused but we have elapsed time - show stored time
         displayTime = elapsedTime;
@@ -729,7 +730,7 @@ function updateTimerDisplay() {
     const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
     timerEl.textContent = formattedTime;
-    console.log(`Timer display: ${formattedTime} (elapsed: ${elapsedTime}, running: ${!!timerInterval})`);
+    console.log(`Timer display: ${formattedTime} (base elapsed: ${elapsedTime}, session time: ${startTime ? Date.now() - startTime : 0}, running: ${!!timerInterval})`);
 }
 
 function updateDifficultyIndicator() {
@@ -1057,8 +1058,12 @@ function saveCurrentGameState() {
         currentLetters[i] = tile ? tile.textContent : '';
     }
 
-    // Calculate current elapsed time if timer is running
-    const currentElapsed = startTime ? Date.now() - startTime : elapsedTime;
+    // Calculate current elapsed time properly
+    let currentElapsed = elapsedTime; // Start with previous elapsed time
+    if (startTime && timerInterval) {
+        // Add current session time if timer is actively running
+        currentElapsed += Date.now() - startTime;
+    }
 
     // Save current game progress
     gameState.currentProgress = {
@@ -1310,7 +1315,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const backBtn = document.getElementById('back-button');
     if (backBtn) {
         backBtn.addEventListener('click', () => {
+            // Stop timer and save game state before navigating away
             if (isMultiplayerMode) {
+                stopTimer();
+                saveCurrentGameState();
                 window.location.href = 'multiplayer-game.html';
             } else {
                 window.location.href = 'index.html';
