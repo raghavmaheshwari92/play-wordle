@@ -413,11 +413,14 @@ function initializeGame() {
 
     // No difficulty indicator needed for hardcoded difficulty
 
-    currentRow = 0;
-    currentTile = 0;
-    isGameOver = false;
-    guesses = [];
-    isSubmitting = false;
+    // Only reset game state if not in multiplayer or if no saved state exists
+    if (!isMultiplayerMode || !hasExistingGameState()) {
+        currentRow = 0;
+        currentTile = 0;
+        isGameOver = false;
+        guesses = [];
+        isSubmitting = false;
+    }
 
     // Reset timer
     stopTimer();
@@ -477,6 +480,11 @@ function addLetter(letter) {
         tile.textContent = letter;
         tile.classList.add('filled');
         currentTile++;
+
+        // Save progress in multiplayer mode
+        if (isMultiplayerMode) {
+            saveCurrentGameState();
+        }
     }
 }
 
@@ -486,6 +494,11 @@ function deleteLetter() {
         const tile = document.getElementById(`row-${currentRow}-tile-${currentTile}`);
         tile.textContent = '';
         tile.classList.remove('filled');
+
+        // Save progress in multiplayer mode
+        if (isMultiplayerMode) {
+            saveCurrentGameState();
+        }
     }
 }
 
@@ -525,6 +538,11 @@ async function submitGuess() {
     guesses.push(guess);
     updateBoard(result);
     updateKeyboard(guess, result);
+
+    // Save current progress in multiplayer mode
+    if (isMultiplayerMode) {
+        saveCurrentGameState();
+    }
 
     if (guess === targetWord) {
         isGameOver = true;
@@ -842,6 +860,9 @@ function checkMultiplayerMode() {
         if (gameData) {
             multiplayerData = JSON.parse(gameData);
         }
+
+        // Restore ongoing game state if player hasn't completed the game
+        restoreGameState();
     }
 }
 
@@ -893,6 +914,132 @@ function handleMultiplayerGameEnd(won) {
     localStorage.setItem('multiplayerGameData', JSON.stringify(multiplayerData));
 
     // Navigation will be handled by the modal continue button
+}
+
+function hasExistingGameState() {
+    if (!isMultiplayerMode || !currentPlayerName) return false;
+
+    const gameState = multiplayerData.gameStates[currentPlayerName];
+    return gameState && gameState.currentProgress && !gameState.completed;
+}
+
+function saveCurrentGameState() {
+    if (!isMultiplayerMode || !currentPlayerName) return;
+
+    const gameState = multiplayerData.gameStates[currentPlayerName];
+    if (!gameState || gameState.completed) return;
+
+    // Get current letters in the current row
+    const currentLetters = [];
+    for (let i = 0; i < currentTile; i++) {
+        const tile = document.getElementById(`row-${currentRow}-tile-${i}`);
+        currentLetters[i] = tile ? tile.textContent : '';
+    }
+
+    // Save current game progress
+    gameState.currentProgress = {
+        currentRow,
+        currentTile,
+        guesses: [...guesses],
+        isGameOver,
+        startTime,
+        elapsedTime,
+        targetWord,
+        currentLetters
+    };
+
+    localStorage.setItem('multiplayerGameData', JSON.stringify(multiplayerData));
+}
+
+function restoreGameState() {
+    if (!isMultiplayerMode || !currentPlayerName) return;
+
+    const gameState = multiplayerData.gameStates[currentPlayerName];
+    if (!gameState || gameState.completed || !gameState.currentProgress) return;
+
+    const progress = gameState.currentProgress;
+
+    // Restore game variables
+    currentRow = progress.currentRow;
+    currentTile = progress.currentTile;
+    guesses = [...progress.guesses];
+    isGameOver = progress.isGameOver;
+    startTime = progress.startTime;
+    elapsedTime = progress.elapsedTime;
+    targetWord = progress.targetWord;
+
+    // Restore the board and keyboard state
+    setTimeout(() => {
+        restoreBoardState();
+        restoreKeyboardState();
+        if (startTime && !isGameOver) {
+            startTimer();
+        }
+    }, 100);
+}
+
+function restoreBoardState() {
+    // Clear the board first
+    const gameBoard = document.getElementById('game-board');
+    gameBoard.innerHTML = '';
+
+    // Recreate the board
+    for (let i = 0; i < MAX_GUESSES; i++) {
+        const row = document.createElement('div');
+        row.classList.add('row');
+        row.setAttribute('id', `row-${i}`);
+
+        for (let j = 0; j < WORD_LENGTH; j++) {
+            const tile = document.createElement('div');
+            tile.classList.add('tile');
+            tile.setAttribute('id', `row-${i}-tile-${j}`);
+            row.appendChild(tile);
+        }
+        gameBoard.appendChild(row);
+    }
+
+    // Restore completed guesses
+    guesses.forEach((guess, rowIndex) => {
+        for (let i = 0; i < WORD_LENGTH; i++) {
+            const tile = document.getElementById(`row-${rowIndex}-tile-${i}`);
+            tile.textContent = guess[i];
+            tile.classList.add('filled');
+
+            // Apply the result styling
+            const result = checkGuess(guess, targetWord);
+            tile.classList.add(result[i]);
+        }
+    });
+
+    // Restore current row if game is not over
+    if (!isGameOver && currentRow < MAX_GUESSES && currentTile > 0) {
+        // Restore partially typed letters in current row
+        const gameState = multiplayerData.gameStates[currentPlayerName];
+        if (gameState && gameState.currentProgress && gameState.currentProgress.currentLetters) {
+            for (let i = 0; i < currentTile; i++) {
+                const tile = document.getElementById(`row-${currentRow}-tile-${i}`);
+                tile.textContent = gameState.currentProgress.currentLetters[i] || '';
+                if (tile.textContent) tile.classList.add('filled');
+            }
+        }
+    }
+}
+
+function restoreKeyboardState() {
+    // Restore keyboard coloring based on guesses
+    guesses.forEach(guess => {
+        const result = checkGuess(guess, targetWord);
+        for (let i = 0; i < guess.length; i++) {
+            const letter = guess[i];
+            const key = document.querySelector(`[data-key="${letter}"]`);
+            if (key) {
+                // Remove existing classes
+                key.classList.remove('correct', 'present', 'absent');
+                // Add the appropriate class
+                key.classList.add(result[i]);
+            }
+        }
+    });
 }
 
 // Initialize game on DOM load
