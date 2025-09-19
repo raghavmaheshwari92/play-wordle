@@ -303,7 +303,7 @@ function getDifficultyColor(difficulty) {
         case DIFFICULTY_LEVELS.EASY:
             return '#6b8e6b'; // Muted green
         case DIFFICULTY_LEVELS.MEDIUM:
-            return '#b5a082'; // Muted orange
+            return '#f4e19c'; // Light yellow
         case DIFFICULTY_LEVELS.HARD:
             return '#c47272'; // Muted red
         default:
@@ -477,13 +477,15 @@ function addLetter(letter) {
         }
 
         const tile = document.getElementById(`row-${currentRow}-tile-${currentTile}`);
-        tile.textContent = letter;
-        tile.classList.add('filled');
-        currentTile++;
+        if (tile) {
+            tile.textContent = letter;
+            tile.classList.add('filled');
+            currentTile++;
 
-        // Save progress in multiplayer mode
-        if (isMultiplayerMode) {
-            saveCurrentGameState();
+            // Save progress in multiplayer mode
+            if (isMultiplayerMode) {
+                saveCurrentGameState();
+            }
         }
     }
 }
@@ -539,11 +541,6 @@ async function submitGuess() {
     updateBoard(result);
     updateKeyboard(guess, result);
 
-    // Save current progress in multiplayer mode
-    if (isMultiplayerMode) {
-        saveCurrentGameState();
-    }
-
     if (guess === targetWord) {
         isGameOver = true;
         showMessage('Genius!');
@@ -581,6 +578,11 @@ async function submitGuess() {
     } else {
         currentRow++;
         currentTile = 0;
+    }
+
+    // Save current progress in multiplayer mode AFTER row/tile updates
+    if (isMultiplayerMode) {
+        saveCurrentGameState();
     }
 
     isSubmitting = false; // Unlock submissions after processing
@@ -972,7 +974,6 @@ function restoreGameState() {
     targetWord = progress.targetWord;
     isSubmitting = false; // Ensure we can accept input
 
-    console.log('Restored game state:', { currentRow, currentTile, isGameOver, guesses: guesses.length });
 
     // Restore the board and keyboard state
     setTimeout(() => {

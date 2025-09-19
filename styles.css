@@ -106,9 +106,9 @@ h1 {
 }
 
 .tile.present {
-    background-color: #b5a082;
-    border-color: #b5a082;
-    color: white;
+    background-color: #f4e19c;
+    border-color: #f4e19c;
+    color: #2d3748;
     animation: flip 0.5s ease;
 }
 
@@ -193,10 +193,10 @@ h1 {
 }
 
 .key.present {
-    background-color: #b5a082;
-    color: white;
-    border-color: #a08f70;
-    box-shadow: 0 2px 4px rgba(181, 160, 130, 0.2);
+    background-color: #f4e19c;
+    color: #2d3748;
+    border-color: #e2cc5b;
+    box-shadow: 0 2px 4px rgba(244, 225, 156, 0.3);
 }
 
 .key.absent {
