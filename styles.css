@@ -379,6 +379,10 @@ h1 {
     text-transform: uppercase;
 }
 
+.modal-word:empty {
+    display: none;
+}
+
 .modal-stats {
     display: flex;
     justify-content: space-around;

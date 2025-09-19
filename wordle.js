@@ -557,7 +557,7 @@ async function submitGuess() {
 
         // Show result modal after a brief delay
         setTimeout(() => {
-            const timeElapsed = startTime ? Math.round((Date.now() - startTime) / 1000) : 0;
+            const timeElapsed = elapsedTime > 0 ? Math.round(elapsedTime / 1000) : (startTime ? Math.round((Date.now() - startTime) / 1000) : 0);
             showResultModal(true, targetWord, timeElapsed, currentRow + 1);
         }, 1500);
 
@@ -570,7 +570,7 @@ async function submitGuess() {
 
         // Show result modal after a brief delay
         setTimeout(() => {
-            const timeElapsed = startTime ? Math.round((Date.now() - startTime) / 1000) : 0;
+            const timeElapsed = elapsedTime > 0 ? Math.round(elapsedTime / 1000) : (startTime ? Math.round((Date.now() - startTime) / 1000) : 0);
             showResultModal(false, targetWord, timeElapsed, MAX_GUESSES);
         }, 1500);
 
@@ -812,14 +812,11 @@ function updateStatistics() {
 
 // Modal functions
 function showResultModal(won, word, time, attempts) {
-    console.log('showResultModal called:', {won, word, time, attempts});
     const modal = document.getElementById('result-modal');
     const modalTitle = document.getElementById('modal-title');
     const modalWord = document.getElementById('modal-word');
     const modalTime = document.getElementById('modal-time');
     const modalAttempts = document.getElementById('modal-attempts');
-
-    console.log('Modal elements found:', {modal, modalTitle, modalWord, modalTime, modalAttempts});
 
     // Set title and styling based on win/loss
     if (won) {
@@ -831,9 +828,14 @@ function showResultModal(won, word, time, attempts) {
     }
 
     // Set word and stats
-    modalWord.textContent = word;
+    if (won) {
+        modalWord.textContent = word;
+    } else {
+        // Don't show the target word when game is lost
+        modalWord.textContent = '';
+    }
     modalTime.textContent = formatModalTime(time);
-    modalAttempts.textContent = attempts;
+    modalAttempts.textContent = `${attempts}/6`;
 
     // Show modal
     modal.style.display = 'flex';
