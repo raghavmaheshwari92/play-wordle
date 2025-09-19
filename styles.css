@@ -99,22 +99,22 @@ h1 {
 }
 
 .tile.correct {
-    background-color: #22c55e;
-    border-color: #22c55e;
+    background-color: #6b8e6b;
+    border-color: #6b8e6b;
     color: white;
     animation: flip 0.5s ease;
 }
 
 .tile.present {
-    background-color: #f59e0b;
-    border-color: #f59e0b;
+    background-color: #c4a572;
+    border-color: #c4a572;
     color: white;
     animation: flip 0.5s ease;
 }
 
 .tile.absent {
-    background-color: #6b7280;
-    border-color: #6b7280;
+    background-color: #7d8590;
+    border-color: #7d8590;
     color: white;
     animation: flip 0.5s ease;
 }
@@ -186,24 +186,24 @@ h1 {
 }
 
 .key.correct {
-    background-color: #22c55e;
+    background-color: #6b8e6b;
     color: white;
-    border-color: #16a34a;
-    box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
+    border-color: #5a7a5a;
+    box-shadow: 0 2px 4px rgba(107, 142, 107, 0.2);
 }
 
 .key.present {
-    background-color: #f59e0b;
+    background-color: #c4a572;
     color: white;
-    border-color: #d97706;
-    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
+    border-color: #b09460;
+    box-shadow: 0 2px 4px rgba(196, 165, 114, 0.2);
 }
 
 .key.absent {
-    background-color: #6b7280;
+    background-color: #7d8590;
     color: white;
-    border-color: #4b5563;
-    box-shadow: 0 2px 4px rgba(107, 114, 128, 0.2);
+    border-color: #6b7785;
+    box-shadow: 0 2px 4px rgba(125, 133, 144, 0.2);
 }
 
 /* Back button in header */
@@ -264,17 +264,17 @@ h1 {
 }
 
 .submit-btn {
-    background-color: #22c55e;
-    border-color: #16a34a;
+    background-color: #6b8e6b;
+    border-color: #5a7a5a;
     color: white;
     flex: 2; /* Make submit button wider */
 }
 
 .submit-btn:hover {
-    background-color: #16a34a;
-    border-color: #15803d;
+    background-color: #5a7a5a;
+    border-color: #4d694d;
     transform: translateY(-1px);
-    box-shadow: 0 4px 6px rgba(34, 197, 94, 0.2);
+    box-shadow: 0 4px 6px rgba(107, 142, 107, 0.2);
 }
 
 .action-btn:active {
@@ -359,7 +359,7 @@ h1 {
 }
 
 .modal-title.win {
-    color: #22c55e;
+    color: #6b8e6b;
 }
 
 .modal-title.lose {
@@ -402,7 +402,7 @@ h1 {
 .stat-value {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #22c55e;
+    color: #6b8e6b;
 }
 
 .modal-footer {
@@ -410,9 +410,9 @@ h1 {
 }
 
 .modal-btn {
-    background-color: #22c55e;
+    background-color: #6b8e6b;
     color: white;
-    border: 2px solid #16a34a;
+    border: 2px solid #5a7a5a;
     border-radius: 8px;
     padding: 12px 24px;
     font-size: 1rem;
@@ -420,14 +420,14 @@ h1 {
     cursor: pointer;
     transition: all 0.2s ease;
     min-width: 120px;
-    box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
+    box-shadow: 0 2px 4px rgba(107, 142, 107, 0.2);
 }
 
 .modal-btn:hover {
-    background-color: #16a34a;
-    border-color: #15803d;
+    background-color: #5a7a5a;
+    border-color: #4d694d;
     transform: translateY(-1px);
-    box-shadow: 0 4px 6px rgba(34, 197, 94, 0.3);
+    box-shadow: 0 4px 6px rgba(107, 142, 107, 0.3);
 }
 
 @media (max-width: 500px) {

@@ -301,13 +301,13 @@ function getDifficultyFromWord(word) {
 function getDifficultyColor(difficulty) {
     switch (difficulty) {
         case DIFFICULTY_LEVELS.EASY:
-            return '#22c55e'; // Green
+            return '#6b8e6b'; // Muted green
         case DIFFICULTY_LEVELS.MEDIUM:
-            return '#f59e0b'; // Orange
+            return '#c4a572'; // Muted orange
         case DIFFICULTY_LEVELS.HARD:
-            return '#ef4444'; // Red
+            return '#c47272'; // Muted red
         default:
-            return '#6b7280'; // Gray
+            return '#7d8590'; // Muted gray
     }
 }
 
@@ -936,6 +936,9 @@ function saveCurrentGameState() {
         currentLetters[i] = tile ? tile.textContent : '';
     }
 
+    // Calculate current elapsed time if timer is running
+    const currentElapsed = startTime ? Date.now() - startTime : elapsedTime;
+
     // Save current game progress
     gameState.currentProgress = {
         currentRow,
@@ -943,7 +946,7 @@ function saveCurrentGameState() {
         guesses: [...guesses],
         isGameOver,
         startTime,
-        elapsedTime,
+        elapsedTime: currentElapsed,
         targetWord,
         currentLetters
     };
@@ -973,7 +976,9 @@ function restoreGameState() {
         restoreBoardState();
         restoreKeyboardState();
         if (startTime && !isGameOver) {
-            startTimer();
+            // Resume timer without resetting startTime
+            timerInterval = setInterval(updateTimerDisplay, 100);
+            updateTimerDisplay();
         }
     }, 100);
 }
@@ -1041,6 +1046,26 @@ function restoreKeyboardState() {
         }
     });
 }
+
+// Handle window focus/blur for timer accuracy
+window.addEventListener('blur', () => {
+    if (timerInterval && startTime && !isGameOver) {
+        // Store current elapsed time when window loses focus
+        elapsedTime = Date.now() - startTime;
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+});
+
+window.addEventListener('focus', () => {
+    if (startTime && !isGameOver && !timerInterval) {
+        // Resume timer when window regains focus
+        // Adjust startTime to account for the time spent unfocused
+        startTime = Date.now() - elapsedTime;
+        timerInterval = setInterval(updateTimerDisplay, 100);
+        updateTimerDisplay();
+    }
+});
 
 // Initialize game on DOM load
 document.addEventListener('DOMContentLoaded', () => {
